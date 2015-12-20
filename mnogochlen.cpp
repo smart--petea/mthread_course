@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <map>
 
 bool getSign(char& character, std::istream& is, int& sign)
 {
@@ -37,18 +38,45 @@ bool getCoefficient(char& character, std::istream& is, int& coefficient)
     return true;
 }
 
+bool preparePower(char& character, std::istream& is)
+{
+    if(character != '*') return false;
+
+    is.get(character);
+    if(character != 'x') return false;
+
+    is.get(character);
+    if(character != '^') return false;
+
+    is.get(character);
+    return true;
+}
+
 
 int main()
 {
-    int character;
+    char character;
     int power;
     int coefficient;
+    int sign;
+    std::map<int, int> polinom;
 
     power = 1;
     coefficient = 1;
     while((character = std::cin.get()) != '=')
     {
- //       coefficient = getCoeficient();
+        getSign(character, std::cin, sign)
+        &&
+        getCoefficient(character, std::cin, coefficient)
+        &&
+        preparePower(character, std::cin)
+        &&
+        getCoefficient(character, std::cin, power);
+
+        coefficient *= sign;
+
+        polinom[power] += coefficient;
+
     }
 
     return 0;
