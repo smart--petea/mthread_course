@@ -21,9 +21,22 @@ bool getSign(char& character, std::istream& is, int& sign)
             is.get(character);
             break;
         default:
-            return true;
+            break;
     }
+    return true;
 }
+
+bool getCoefficient(char& character, std::istream& is, int& coefficient)
+{
+    coefficient = 0;
+    while(character >= '0' && character <= '9')
+    {
+        coefficient = coefficient * 10 + character;
+    }
+
+    return true;
+}
+
 
 int main()
 {
