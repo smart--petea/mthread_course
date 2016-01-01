@@ -29,7 +29,11 @@ void* SmallAllocator::ReAlloc(void *Pointer, unsigned int Size)
     if(Pointer == NULL) return Alloc(Size);
 
     PointerInfo* PointerTmp = Pointers;
-    while(PointerTmp != NULL && PointerTmp->pointer != Pointer) PointerTmp = PointerTmp->next;
+    while(PointerTmp != NULL && PointerTmp->pointer != Pointer) 
+    {
+        std::cout << "next" << std::endl;
+        PointerTmp = PointerTmp->next;
+    }
 
     if(PointerTmp->size >= Size) {
         PointerTmp->size = Size;
@@ -39,7 +43,9 @@ void* SmallAllocator::ReAlloc(void *Pointer, unsigned int Size)
     //copy algorithm
     Pointer = Alloc(Size);
     unsigned int diff = PointerTmp->size;
-    while(diff >= 0) *((char*)Pointer + diff) = *(PointerTmp->pointer + diff);
+
+    while(diff > 0) *((char*)Pointer + diff) = *(PointerTmp->pointer + diff), --diff;
+    *((char*)Pointer + diff) = *(PointerTmp->pointer + diff);
 
     Free(PointerTmp->pointer);
     return Pointer;
@@ -65,7 +71,6 @@ void SmallAllocator::Free(void *Pointer)
     if(Pointer == NULL) return;
     if(Pointers == NULL) return;
 
-    PointerInfo* Pointers;
     PointerInfo* PointersTmp = Pointers;
     if(Pointers->pointer == Pointer)
     {
@@ -95,12 +100,18 @@ int main()
 {
     SmallAllocator A1;
     int* A1_P1 = (int*) A1.Alloc(sizeof(int));
-    //A1_P1 = (int *) A1.ReAlloc(A1_P1, 2 * sizeof(int));
+    A1_P1 = (int *) A1.ReAlloc(A1_P1, 2 * sizeof(int));
 
     *A1_P1 = 5;
     std::cout << *A1_P1 << std::endl;
 
-    A1.Free(A1_P1);
+    int* A1_P2 = (int*) A1.Alloc(sizeof(int));
+    *A1_P2 = 6;
+    A1_P2 = (int *) A1.ReAlloc(A1_P2, 2 * sizeof(int));
+
+    std::cout << *A1_P2 << std::endl;
+
+    A1.Free(A1_P2);
 
     return 0;
 }
