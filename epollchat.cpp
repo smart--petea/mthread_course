@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 
     struct sockaddr_in ServerAddr;
     ServerAddr.sin_family = AF_INET;
-    ServerAddr.sin_port = htons(6666);
+    ServerAddr.sin_port = htons(6667);
     ServerAddr.sin_addr.s_addr = htonl(INADDR_ANY); //0.0.0.0
 
     if(bind(ServerSocket, (struct sockaddr*)(&ServerAddr), sizeof(ServerAddr)) < 0)
@@ -139,7 +139,7 @@ int main(int argc, char** argv)
 
                     if(epoll_ctl(efd, EPOLL_CTL_ADD, ClientSocket, &ClientEvent) == -1)
                     {
-                        printf("Can't register client socket to epoll instance");
+                        printf("Can't register client socket to epoll instance\n");
                         close_socket(ClientSocket);
                         continue;
                     }
@@ -147,14 +147,20 @@ int main(int argc, char** argv)
                 } else
                 {
                     //client branch
-                    static char Buffer[1024];
-                    int Recv = recv(Events[i].data.fd, Buffer, 1024, MSG_NOSIGNAL);
-                    if(Recv == 0 || errno == EAGAIN || errno == EWOULDBLOCK)
+                    static char Buffer[5];
+                    int Recv = recv(Events[i].data.fd, Buffer, 5, MSG_NOSIGNAL);
+
+                    if(Recv == 0 )
                     {
+                        printf("Closing socket. Recv == 0\n");
+                        close_socket(Events[i].data.fd);
                     } else if (Recv == -1)
                     {
-                        printf("Closing socket. (Recv < 0) %s\n", strerror(errno));
-                        close_socket(Events[i].data.fd);
+                        if(errno != EAGAIN || errno != EWOULDBLOCK)
+                        {
+                            printf("Closing socket. (Recv < 0) %s\n", strerror(errno));
+                            close_socket(Events[i].data.fd);
+                        }
                     } else
                     {
                         int sent = send(Events[i].data.fd, Buffer, Recv, MSG_NOSIGNAL);

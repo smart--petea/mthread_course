@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include <functional>
 
 bool getSign(char& character, std::istream& is, int& sign)
 {
@@ -69,26 +70,25 @@ bool preparePower(char& character, std::istream& is, int& power)
     return true;
 }
 
-
-int main()
-{
+std::string derivative(std::string polynomial) {
     char character;
     int pwr;
     int coefficient;
     int sign;
-    std::map<int, int> polinom;
+    std::map<int, int, std::greater<int> > polinom;
+    std::istringstream plnmInput(polynomial + '\0');
+    std::ostringstream result;
 
-    character = std::cin.get();
-    while(character != '\n')
+    character = plnmInput.get();
+    while(character != '\0')
     {
-
-        getSign(character, std::cin, sign)
+        getSign(character, plnmInput, sign)
         &&
-        getCoefficient(character, std::cin, coefficient)
+        getCoefficient(character, plnmInput, coefficient)
         &&
-        preparePower(character, std::cin, pwr)
+        preparePower(character, plnmInput, pwr)
         &&
-        getCoefficient(character, std::cin, pwr);
+        getCoefficient(character, plnmInput, pwr);
 
         coefficient *= sign;
 
@@ -103,25 +103,26 @@ int main()
         pwr = it->first - 1;
         coefficient = it->second * it->first;
 
-        if(coefficient > 0) {
-            if(isFirstLoop == false) std::cout << "+";
-        } else if (coefficient < 0)
-        {
-            std::cout << "-";
-        } else
-        {
-            continue;
-        }
+        if(coefficient == 0) continue;
+        if(coefficient > 0 && isFirstLoop == false) result << "+"; 
 
-        std::cout << coefficient;
+        result << coefficient;
+
         if(pwr > 0) {
-            std::cout << "*x";
-            if(pwr > 1) std::cout << "^" << pwr;
+            result << "*x";
+            if(pwr > 1) result << "^" <<  pwr;
         }
 
         isFirstLoop = false;
     }
-    std::cout << std::endl;
+
+    return result.str();
+}
+
+
+int main()
+{
+    std::cout << derivative("x+x+x+x+x+x+x+x+x+x") << std::endl;
 
     return 0;
 }
