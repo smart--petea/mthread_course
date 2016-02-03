@@ -4,11 +4,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
-char* getCmd(char** cmds, int* size)
+char* getCmd(char** cmds)
 {
     if(*cmds == NULL || **cmds == '\0')
     {
-        *size = 0;
         return NULL;
     }
 
@@ -16,20 +15,21 @@ char* getCmd(char** cmds, int* size)
 
     char* cmdsTail = strchr(*cmds, '|');
     int resize;
+    int size;
 
     if(cmdsTail == NULL)
     {
         cmdsTail = strchr(*cmds, '\0');
-        resize = *size = cmdsTail - *cmds;
+        resize = size = cmdsTail - *cmds;
     } else
     {
-        *size = cmdsTail - *cmds;
-        resize = *size + 1;
+        size = cmdsTail - *cmds;
+        resize = size + 1;
     }
 
-    char* x = malloc(*size);
-    strncpy(x, *cmds, *size);
-    x[*size] = '\0';
+    char* x = malloc(size);
+    strncpy(x, *cmds, size);
+    x[size] = '\0';
     *cmds = *cmds + resize;
     return x;
 }
@@ -43,26 +43,26 @@ int main(int argc, char** argv)
     }
 
     char* commands = argv[1];
-    char* cmd;
-    int size;
-    while((cmd = getCmd(&commands, &size)) != NULL)
+    char* cmdParent;
+    char* cmdChild;
+    cmdParent = getCmd(&commands);
+    //parent
+    printf("cmdParent = %s\n", cmdParent);
+
+    while((cmdChild = getCmd(&commands)) != NULL)
     {
-        printf("%s\n", cmd);
-        //if(fork())
-        //{
-        //    //parent
-        //    int size = commandsTail - commands;
-        //    char cmd[size];
-        //    strncpy(cmd, commands, size);
-        //    cmd[size] = '\n';
-        //    printf("%s\n", cmd);
-        //    break;
-        //} else
-        //{
-        //    commands = commandsTail + 1;
-        //    //child
-        //}
+        if(fork())
+        {
+            break;
+        } else
+        {
+            printf("cmdChild = %s\n", cmdChild);
+            //child
+        }
     }
 
+    //free memory
+    free(cmdParent);
+    free(cmdChild);
     return 0;
 }
